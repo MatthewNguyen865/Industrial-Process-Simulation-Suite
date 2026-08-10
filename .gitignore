@@ -1,0 +1,9 @@
+*.asv
+*.m~
+*.mat
+
+slprj/
+*.slxc
+
+results/*
+!results/.gitkeep
