@@ -9,8 +9,8 @@ simulation.process.params.UA = 100;
 simulation.process.params.Tamb = 298.15;
 
 % Process inputs
-simulation.process.inputs.Tin = 298.15;
-simulation.process.inputs.Q = 5000;
+simulation.process.inputs.Tin = @(t) 298.15;
+simulation.process.inputs.Q = @(t) 5000;
 
 % Initial condition
 simulation.process.x0 = 298.15;
@@ -19,6 +19,6 @@ simulation.process.x0 = 298.15;
 simulation.settings.tspan = [0 500];
 
 % Process model
-simulation.process.model = @(t, T) heated_tank(t, T, simulation.process.params, simulation.process.inputs);
+simulation.process.model = @heated_tank;
 
 end
