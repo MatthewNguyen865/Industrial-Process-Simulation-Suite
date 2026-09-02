@@ -12,8 +12,12 @@ simulation.process.params.Tamb = 298.15;
 simulation.process.inputs.Tin = @inlet_temperature;
 simulation.process.inputs.Q = @(t) 5000;
 
-% Initial condition
+simulation.process.inputs.Tin_initial = 298.15;
+simulation.process.inputs.Tin_final = 293.15;
+
+% Process conditions
 simulation.process.x0 = 298.15;
+simulation.process.disturbance_time = 200;
 
 % Simulation settings
 simulation.settings.tspan = [0 500];
@@ -21,14 +25,14 @@ simulation.settings.tspan = [0 500];
 % Process model
 simulation.process.model = @heated_tank;
 
-end
-
 function Tin = inlet_temperature(t);
 
-    if t < 200
-        Tin = 298.15;
+    if t < simulation.process.disturbance_time;
+        Tin = simulation.process.inputs.Tin_initial;
     else
-        Tin = 293.15
+        Tin = simulation.process.inputs.Tin_final;
     end
+
+end
 
 end
