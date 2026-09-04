@@ -1,11 +1,11 @@
 function characteristics = process_characteristics(t, T, disturbance_time, input_initial, input_final)
 
     % Determine initial steady state
-    initial_region = t >= 0.8 * disturbance_time & t < disturbance_time;
+    initial_region = t >= 0.95 * disturbance_time & t < disturbance_time;
     initial_steady_state = mean(T(initial_region));
 
     % Determine final steady state
-    final_region = t >= disturbance_time + 0.8 * (t(end) - disturbance_time);
+    final_region = t >= disturbance_time + 0.95 * (t(end) - disturbance_time);
     final_steady_state = mean(T(final_region));
 
     % Calculate process gain
@@ -15,11 +15,16 @@ function characteristics = process_characteristics(t, T, disturbance_time, input
     T632 = initial_steady_state + 0.632 * (final_steady_state - initial_steady_state);
     after_dis = t > disturbance_time & t <= t(end);
     [~, index] = min(abs(T(after_dis) - T632));
-    Tao = t(index);
+    t_after_dis = t(after_dis);
+    t63 = t_after_dis(index);
+    Tau = t63 - disturbance_time;
+        % The 63.2% time is estimated from the nearest simulated point.
 
     % Initialize Values
     characteristics.initial_steady_state = initial_steady_state;
     characteristics.final_steady_state = final_steady_state;
     characteristics.process_gain = Kp;
-    characteristics.time_constant = Tao;
+    characteristics.time_constant = Tau;
+    characteristics.T632 = T632;
+    characteristics.t63 = t63;
 end
