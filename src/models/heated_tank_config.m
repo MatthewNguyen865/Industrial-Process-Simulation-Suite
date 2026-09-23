@@ -17,6 +17,8 @@ simulation.process.inputs.Tin_final = 293.15;
 
 % Process conditions
 simulation.process.x0 = 298.15;
+
+% Disturbance
 simulation.process.disturbance_time = 200;
 
 % Simulation settings

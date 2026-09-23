@@ -5,31 +5,40 @@ close all;
 addpath(genpath("src"));
 
 simulation = heated_tank_config();
+Tin_final_cases = [293.15 288.15 283.15];
+
 t_start = simulation.settings.tspan(1);
 t_end = simulation.settings.tspan(2);
 t_dis = simulation.process.disturbance_time;
 
-Tin_initial = simulation.process.inputs.Tin_initial;
-Tin_final = simulation.process.inputs.Tin_final;
+results = struct();
 
-simulation_initial = simulation;
-simulation_initial.process.inputs.Tin = @(t) Tin_initial;
+for i = 1:length(Tin_final_cases)
 
-simulation_final = simulation;
-simulation_final.process.inputs.Tin = @(t) Tin_final;
+    simulation_case = simulation;
 
-[t1, T1] = ode45(@(t, x) process_model(t, x, simulation_initial), [t_start t_dis], simulation.process.x0);
-[t2, T2] = ode45(@(t, x) process_model(t, x, simulation_final), [t_dis t_end], T1(end));
+    simulation_case.process.inputs.Tin_final = Tin_final_cases(i);
 
-t = [t1; t2(2:end)];
-T = [T1; T2(2:end)];
+    Tin_initial = simulation_case.process.inputs.Tin_initial;
+    Tin_final = simulation_case.process.inputs.Tin_final;
 
-characteristics = process_characteristics(t, T, simulation.process.disturbance_time, simulation.process.inputs.Tin_initial, simulation.process.inputs.Tin_final);
+    simulation_initial = simulation_case;
+    simulation_initial.process.inputs.Tin = @(t) Tin_initial;
 
-fprintf('Initial = %.4f K\n', characteristics.initial_steady_state);
-fprintf('Final = %.4f K\n', characteristics.final_steady_state);
-fprintf('T(end) = %.6f K\n', T(end));
-fprintf('Process gain = %.4f\n', characteristics.process_gain);
-fprintf('Time constant = %.4f S\n', characteristics.time_constant);
+    simulation_final = simulation_case;
+    simulation_final.process.inputs.Tin = @(t) Tin_final;
 
-plot_process_response(t, T, simulation.process.disturbance_time, characteristics);
+    [t1, T1] = ode45(@(t, x) process_model(t, x, simulation_initial), [t_start t_dis], simulation_case.process.x0);
+    [t2, T2] = ode45(@(t, x) process_model(t, x, simulation_final), [t_dis t_end], T1(end));
+
+    t_case = [t1; t2(2:end)];
+    T_case = [T1; T2(2:end)];
+
+    results(i).Tin_final = Tin_final;
+    results(i).t = t_case;
+    results(i).T = T_case;
+
+    results(i).characteristics = process_characteristics(t_case, T_case, t_dis, Tin_initial, Tin_final);
+end
+
+plot_process_comparison(results, t_dis);
